@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Novell.Directory.Ldap;
+using Coming.ActiveDirectoryHelper.Helpers;
 
 namespace Coming.ActiveDirectoryHelper
 {
@@ -66,6 +67,8 @@ namespace Coming.ActiveDirectoryHelper
             string[] attributes = { "name" };
 
             LdapConnection ldapConn = new LdapConnection();
+
+            await LdapHelper.ConnectionWrapper(settings, connection => { });
 
             await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
 
