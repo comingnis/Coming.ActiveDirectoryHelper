@@ -49,5 +49,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Coming.ActiveDirectoryHelper\Coming.ActiveDirectoryHelper.csproj">
+      <Project>{05ac8f02-2929-4f95-9102-ff3903b522d4}</Project>
+      <Name>Coming.ActiveDirectoryHelper</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
