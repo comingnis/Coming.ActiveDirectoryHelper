@@ -27,11 +27,11 @@ namespace ActiveDirectoryHelperDemo
             //    Console.WriteLine(groupsForUser.Count());
             //}
 
-            //bool correct = await helper.ValidateCredential("CN=Nikola Nikolic,CN=Users,DC=glasnik,DC=local", "Nikol@.123");
-            ADHelperUser user = await helper.GetUserByAccountName("monique");
-            IEnumerable<string> groupsForUser = await helper.GetGroupsForUser(user);
-            IEnumerable<string> accountNames = await helper.GetMemberOfGroup("DMS_Test");
-            IEnumerable<string> groups = await helper.GetAllGroups();
+            bool correct = helper.ValidateCredential("CN=Nikola Nikolic,CN=Users,DC=glasnik,DC=local", "Nikol@.123");
+            ADHelperUser user = helper.GetUserByAccountName("monique");
+            IEnumerable<string> groupsForUser = helper.GetGroupsForUser(user);
+            IEnumerable<string> accountNames = helper.GetMemberOfGroup("DMS_Test");
+            IEnumerable<string> groups = helper.GetAllGroups();
 
             foreach (var group in groups)
             {

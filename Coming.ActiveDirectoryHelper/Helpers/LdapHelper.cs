@@ -11,15 +11,15 @@ namespace Coming.ActiveDirectoryHelper.Helpers
 {
     internal static class LdapHelper
     {
-        public static async Task<T> ConnectionWrapper<T>(ADHelperSettings aDHelperSettings, Func<LdapConnection, T> func)
+        public static T ConnectionWrapper<T>(ADHelperSettings aDHelperSettings, Func<LdapConnection, T> func)
         {
             LdapConnection ldapConn = new LdapConnection();
 
             try
             {
-                await ldapConn.ConnectAsync(aDHelperSettings.ServerName, aDHelperSettings.ServerPort);
+                ldapConn.Connect(aDHelperSettings.ServerName, aDHelperSettings.ServerPort);
 
-                await ldapConn.BindAsync(aDHelperSettings.BindDistinguishName, aDHelperSettings.BindPassword);
+                ldapConn.Bind(aDHelperSettings.BindDistinguishName, aDHelperSettings.BindPassword);
 
                 var result = func(ldapConn);
 
@@ -39,15 +39,15 @@ namespace Coming.ActiveDirectoryHelper.Helpers
             }
         }
 
-        public static async Task ConnectionWrapper(ADHelperSettings aDHelperSettings, Action<LdapConnection> func)
+        public static void ConnectionWrapper(ADHelperSettings aDHelperSettings, Action<LdapConnection> func)
         {
             LdapConnection ldapConn = new LdapConnection();
 
             try
             {
-                await ldapConn.ConnectAsync(aDHelperSettings.ServerName, aDHelperSettings.ServerPort);
+                ldapConn.Connect(aDHelperSettings.ServerName, aDHelperSettings.ServerPort);
 
-                await ldapConn.BindAsync(aDHelperSettings.BindDistinguishName, aDHelperSettings.BindPassword);
+                ldapConn.Bind(aDHelperSettings.BindDistinguishName, aDHelperSettings.BindPassword);
 
                func(ldapConn);
             }

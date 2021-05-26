@@ -18,14 +18,14 @@ namespace Coming.ActiveDirectoryHelper
             this.settings = settings;
         }
 
-        public async Task<IEnumerable<string>> GetAllGroups()
+        public IEnumerable<string> GetAllGroups()
         {
             string searchFilter = "(objectClass=group)";
             string[] attributes = { "name" };
 
 
-            return await LdapHelper.ConnectionWrapper(settings, async connection => {
-                ILdapSearchResults result = await connection.SearchAsync(
+            return LdapHelper.ConnectionWrapper(settings, connection => {
+                ILdapSearchResults result = connection.Search(
                     settings.SearchBase,
                     LdapConnection.ScopeSub,
                     searchFilter,
@@ -52,17 +52,17 @@ namespace Coming.ActiveDirectoryHelper
                 }
 
                 return groupNames;
-            }).Result;
+            });
         }
 
-        public async Task<IEnumerable<string>> GetGroupsForUser(ADHelperUser user)
+        public IEnumerable<string> GetGroupsForUser(ADHelperUser user)
         {
             string searchFilter = $"(&(objectClass=group)(member={user.DistinguishedName}))";
             string[] attributes = { "name" };
 
-            return await LdapHelper.ConnectionWrapper(settings, async connection => {
+            return LdapHelper.ConnectionWrapper(settings, connection => {
 
-                ILdapSearchResults result = await connection.SearchAsync(
+                ILdapSearchResults result = connection.Search(
                        settings.SearchBase,
                        LdapConnection.ScopeSub,
                        searchFilter,
@@ -90,16 +90,16 @@ namespace Coming.ActiveDirectoryHelper
                 }
 
                 return groupNames;
-            }).Result;
+            });
         }
 
-        public async Task<IEnumerable<string>> GetMemberOfGroup(string groupName)
+        public IEnumerable<string> GetMemberOfGroup(string groupName)
         {
-            return await LdapHelper.ConnectionWrapper(settings, async connection => {
+            return LdapHelper.ConnectionWrapper(settings, connection => {
 
                 string searchFilter = $"(&(objectClass=group)(name={groupName}))";
 
-                ILdapSearchResults groupDNresult = await connection.SearchAsync(
+                ILdapSearchResults groupDNresult = connection.Search(
                     settings.SearchBase,
                     LdapConnection.ScopeSub,
                     searchFilter,
@@ -113,7 +113,7 @@ namespace Coming.ActiveDirectoryHelper
                 searchFilter = $"(&(objectClass=user)(memberOf={groupDN}))";
                 string[] attributes = { "sAMAccountName" };
 
-                ILdapSearchResults accountNamesresult = await connection.SearchAsync(
+                ILdapSearchResults accountNamesresult = connection.Search(
                     settings.SearchBase,
                     LdapConnection.ScopeSub,
                     searchFilter,
@@ -140,16 +140,15 @@ namespace Coming.ActiveDirectoryHelper
                 }
 
                 return accountNames;
-            }).Result;
-
+            });
         }
 
-        public async Task<ADHelperUser> GetUserByAccountName(string sAMAccountName)
+        public ADHelperUser GetUserByAccountName(string sAMAccountName)
         {
             string searchFilter = $"(&(objectClass=user)(sAMAccountName={sAMAccountName}))";
 
-            return await LdapHelper.ConnectionWrapper(settings, async connection => {
-                ILdapSearchResults result = await connection.SearchAsync(
+            return LdapHelper.ConnectionWrapper(settings, connection => {
+                ILdapSearchResults result = connection.Search(
                         settings.SearchBase,
                         LdapConnection.ScopeSub,
                         searchFilter,
@@ -172,19 +171,18 @@ namespace Coming.ActiveDirectoryHelper
                 {
                     return null;
                 }
-
-            }).Result;
+            });
         }
 
-        public async Task<bool> ValidateCredential(string distinguishedName, string password)
+        public bool ValidateCredential(string distinguishedName, string password)
         {
             try
             {
                 LdapConnection ldapConn = new LdapConnection();
 
-                await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
+                ldapConn.Connect(settings.ServerName, settings.ServerPort);
 
-                await ldapConn.BindAsync(distinguishedName, password);
+                ldapConn.Bind(distinguishedName, password);
 
                 ldapConn.Disconnect();
 
