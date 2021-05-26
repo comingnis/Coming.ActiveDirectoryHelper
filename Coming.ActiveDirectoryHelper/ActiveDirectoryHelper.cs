@@ -21,103 +21,85 @@ namespace Coming.ActiveDirectoryHelper
         public async Task<IEnumerable<string>> GetAllGroups()
         {
             string searchFilter = "(objectClass=group)";
-            int searchScope = LdapConnection.ScopeSub;
             string[] attributes = { "name" };
 
-            LdapConnection ldapConn = new LdapConnection();
 
-            await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
+            return await LdapHelper.ConnectionWrapper(settings, async connection => {
+                ILdapSearchResults result = await connection.SearchAsync(
+                    settings.SearchBase,
+                    LdapConnection.ScopeSub,
+                    searchFilter,
+                    attributes,
+                    false
+                );
 
-            await ldapConn.BindAsync(settings.BindDistinguishName, settings.BindPassword);
+                List<string> groupNames = new List<string>();
 
-            ILdapSearchResults result = await ldapConn.SearchAsync(
-                        settings.SearchBase,
-                        searchScope,
-                        searchFilter,
-                        attributes,
-                        false
-                    );
-
-            List<string> groupNames = new List<string>();
-
-            while (result.HasMore())
-            {
-                LdapEntry nextEntry = null;
-                try
+                while (result.HasMore())
                 {
-                    nextEntry = result.Next();
-                }
-                catch (LdapException e)
-                {
-                    //Exception is thrown, go for next entry
-                    continue;
+                    LdapEntry nextEntry = null;
+                    try
+                    {
+                        nextEntry = result.Next();
+                    }
+                    catch (LdapException e)
+                    {
+                        //Exception is thrown, go for next entry
+                        continue;
+                    }
+
+                    groupNames.Add(nextEntry.GetAttribute("name").StringValue);
                 }
 
-                // Console.WriteLine(nextEntry.Dn + "\n" + nextEntry.GetAttribute("sAMAccountName") + "\n\n");
-                groupNames.Add(nextEntry.GetAttribute("name").StringValue);
-            }
-
-            return groupNames;
+                return groupNames;
+            }).Result;
         }
 
         public async Task<IEnumerable<string>> GetGroupsForUser(ADHelperUser user)
         {
-            int searchScope = LdapConnection.ScopeSub;
             string searchFilter = $"(&(objectClass=group)(member={user.DistinguishedName}))";
             string[] attributes = { "name" };
 
-            LdapConnection ldapConn = new LdapConnection();
+            return await LdapHelper.ConnectionWrapper(settings, async connection => {
 
-            await LdapHelper.ConnectionWrapper(settings, connection => { });
+                ILdapSearchResults result = await connection.SearchAsync(
+                       settings.SearchBase,
+                       LdapConnection.ScopeSub,
+                       searchFilter,
+                       attributes,
+                       false
+                   );
 
-            await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
+                IList<string> groupNames = new List<string>();
 
-            await ldapConn.BindAsync(settings.BindDistinguishName, settings.BindPassword);
-
-            ILdapSearchResults result = await ldapConn.SearchAsync(
-                        settings.SearchBase,
-                        searchScope,
-                        searchFilter,
-                        attributes,
-                        false
-                    );
-
-            List<string> groupNames = new List<string>();
-
-            while (result.HasMore())
-            {
-                LdapEntry nextEntry = null;
-                try
+                while (result.HasMore())
                 {
-                    nextEntry = result.Next();
-                }
-                catch (LdapException e)
-                {
-                    //Exception is thrown, go for next entry
-                    continue;
+                    LdapEntry nextEntry = null;
+                    try
+                    {
+                        //result.
+                        nextEntry = result.Next();
+                    }
+                    catch (LdapException e)
+                    {
+                        //Exception is thrown, go for next entry
+                        continue;
+                    }
+
+                    groupNames.Add(nextEntry.GetAttribute("name").StringValue);
                 }
 
-                groupNames.Add(nextEntry.GetAttribute("name").StringValue);
-            }
-
-            return groupNames;
+                return groupNames;
+            }).Result;
         }
 
         public async Task<IEnumerable<string>> GetMemberOfGroup(string groupName)
         {
-            try
-            {
-                LdapConnection ldapConn = new LdapConnection();
-
-                await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
-
-                await ldapConn.BindAsync(settings.BindDistinguishName, settings.BindPassword);
-
-                #region get distinguishedName of group
+            return await LdapHelper.ConnectionWrapper(settings, async connection => {
 
                 string searchFilter = $"(&(objectClass=group)(name={groupName}))";
 
-                ILdapSearchResults groupDNresult = await ldapConn.SearchAsync(
+                ILdapSearchResults groupDNresult = await connection.SearchAsync(
                     settings.SearchBase,
                     LdapConnection.ScopeSub,
                     searchFilter,
@@ -128,14 +110,10 @@ namespace Coming.ActiveDirectoryHelper
                 var res = groupDNresult.First();
                 string groupDN = res.Dn;
 
-                #endregion
-
-                #region get memebers account names
-
                 searchFilter = $"(&(objectClass=user)(memberOf={groupDN}))";
                 string[] attributes = { "sAMAccountName" };
 
-                ILdapSearchResults accountNamesresult = await ldapConn.SearchAsync(
+                ILdapSearchResults accountNamesresult = await connection.SearchAsync(
                     settings.SearchBase,
                     LdapConnection.ScopeSub,
                     searchFilter,
@@ -162,52 +140,40 @@ namespace Coming.ActiveDirectoryHelper
                 }
 
                 return accountNames;
+            }).Result;
 
-                #endregion region
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
         }
 
         public async Task<ADHelperUser> GetUserByAccountName(string sAMAccountName)
         {
             string searchFilter = $"(&(objectClass=user)(sAMAccountName={sAMAccountName}))";
-            int searchScope = LdapConnection.ScopeSub;
 
-            LdapConnection ldapConn = new LdapConnection();
-
-            await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
-
-            await ldapConn.BindAsync(settings.BindDistinguishName, settings.BindPassword);
-
-            ILdapSearchResults result = await ldapConn.SearchAsync(
+            return await LdapHelper.ConnectionWrapper(settings, async connection => {
+                ILdapSearchResults result = await connection.SearchAsync(
                         settings.SearchBase,
-                        searchScope,
+                        LdapConnection.ScopeSub,
                         searchFilter,
                         null,
                         false
                     );
+                try
+                {
+                    ADHelperUser user = new ADHelperUser();
+                    var fres = result.First();
 
-            try
-            {
-                // ici ce neko mapiranje umesto ovog dela koda
+                    user.Name = fres.GetAttribute("name").StringValue;
+                    user.DistinguishedName = fres.Dn;
+                    user.SamAccountName = fres.GetAttribute("sAMAccountName").StringValue;
+                    user.DisplayName = fres.GetAttribute("displayName").StringValue;
 
-                ADHelperUser user = new ADHelperUser();
-                var fres = result.First();
+                    return user;
+                }
+                catch (Exception ex)
+                {
+                    return null;
+                }
 
-                user.Name = fres.GetAttribute("name").StringValue;
-                user.DistinguishedName = fres.Dn;
-                user.SamAccountName = fres.GetAttribute("sAMAccountName").StringValue;
-                user.DisplayName = fres.GetAttribute("displayName").StringValue;
-
-                return user;
-            }
-            catch (Exception ex)
-            {
-                return null;
-            }
+            }).Result;
         }
 
         public async Task<bool> ValidateCredential(string distinguishedName, string password)
@@ -216,7 +182,7 @@ namespace Coming.ActiveDirectoryHelper
             {
                 LdapConnection ldapConn = new LdapConnection();
 
-                await ldapConn.ConnectAsync(settings.BindDistinguishName, settings.ServerPort);
+                await ldapConn.ConnectAsync(settings.ServerName, settings.ServerPort);
 
                 await ldapConn.BindAsync(distinguishedName, password);
 
