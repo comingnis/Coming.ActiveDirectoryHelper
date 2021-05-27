@@ -9,7 +9,7 @@
     <license type="expression">MIT</license>
     <projectUrl>https://github.com/comingnis/Coming.ActiveDirectoryHelper</projectUrl>
     <description>$description$</description>
-    <releaseNotes>Beta release.</releaseNotes>
+    <releaseNotes>Fixed some bugs.</releaseNotes>
     <copyright>$copyright$</copyright>
     <tags></tags>
     <dependencies>
