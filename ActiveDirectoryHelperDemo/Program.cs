@@ -14,11 +14,7 @@ namespace ActiveDirectoryHelperDemo
         static async Task Main(string[] args)
         {
             ADHelperSettings settings = new ADHelperSettings();
-            settings.ServerName = "10.234.0.10";
-            settings.ServerPort = 389;
-            settings.BindDistinguishName = "CN=Nikola Nikolic,CN=Users,DC=glasnik,DC=local";
-            settings.BindPassword = "Nikol@.123";
-            settings.SearchBase = "DC=glasnik,DC=local";
+
 
             ActiveDirectoryHelper helper = new ActiveDirectoryHelper(settings);
 
