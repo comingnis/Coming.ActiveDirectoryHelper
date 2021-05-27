@@ -1,5 +1,6 @@
 ﻿using Coming.ActiveDirectoryHelper;
 using Coming.ActiveDirectoryHelper.Models;
+using Novell.Directory.Ldap;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,8 @@ namespace ActiveDirectoryHelperDemo
 
             ActiveDirectoryHelper helper = new ActiveDirectoryHelper(settings);
 
-            //while (true)
-            //{
-            //    IEnumerable<string> groupsForUser = await helper.GetGroupsForUser(user);
-            //    Console.WriteLine(groupsForUser.Count());
-            //}
-
             bool correct = helper.ValidateCredential("CN=Nikola Nikolic,CN=Users,DC=glasnik,DC=local", "Nikol@.123");
-            ADHelperUser user = helper.GetUserByAccountName("monique");
+            ADHelperUser user = helper.GetUserByAccountName("jova.jokic");
             IEnumerable<string> groupsForUser = helper.GetGroupsForUser(user);
             IEnumerable<string> accountNames = helper.GetMemberOfGroup("DMS_Test");
             IEnumerable<string> groups = helper.GetAllGroups();
@@ -37,6 +32,13 @@ namespace ActiveDirectoryHelperDemo
             {
                 Console.WriteLine(group + "\n");
             }
+
+            string accName = user.SamAccountName;
+            string email = user.EmailAddress;
+            string surname = user.Surname;
+
+            bool isAccountExpired = user.IsUserExpired();
+
         }
     }
 }

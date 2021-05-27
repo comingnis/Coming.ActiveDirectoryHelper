@@ -158,12 +158,13 @@ namespace Coming.ActiveDirectoryHelper
                 try
                 {
                     ADHelperUser user = new ADHelperUser();
-                    var fres = result.First();
+                    var firstResult = result.First();
+                    var attrSet = firstResult.GetAttributeSet();
 
-                    user.Name = fres.GetAttribute("name").StringValue;
-                    user.DistinguishedName = fres.Dn;
-                    user.SamAccountName = fres.GetAttribute("sAMAccountName").StringValue;
-                    user.DisplayName = fres.GetAttribute("displayName").StringValue;
+                    foreach (var attr in attrSet)
+                    {
+                        user[attr.Name] = attr;
+                    }
 
                     return user;
                 }
