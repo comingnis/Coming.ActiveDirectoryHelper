@@ -14,6 +14,12 @@ namespace Test
         {
             ADHelperSettings settings = new ADHelperSettings();
 
+            settings.BindDistinguishName = "Some DN which will be used for accessing AD.";
+            settings.BindPassword = "password";
+            settings.SearchBase = "Search base DN";
+            settings.ServerName = "IP address or server name";
+            settings.ServerPort = 389; // Server port. Default is 389.
+
             ActiveDirectoryHelper helper = new ActiveDirectoryHelper(settings);
 
             bool correct = helper.ValidateCredential("DN", "password");
