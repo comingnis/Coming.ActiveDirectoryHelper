@@ -49,7 +49,7 @@ namespace Coming.ActiveDirectoryHelper.Helpers
 
                 ldapConn.Bind(aDHelperSettings.BindDistinguishName, aDHelperSettings.BindPassword);
 
-               func(ldapConn);
+                func(ldapConn);
             }
             catch (Exception ex)
             {

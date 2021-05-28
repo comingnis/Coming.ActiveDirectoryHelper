@@ -15,50 +15,50 @@ namespace Coming.ActiveDirectoryHelper.Models
         }
 
         private Dictionary<string, LdapAttribute> Attributes;
-        public string Name 
-        { 
-            get 
+        public string Name
+        {
+            get
             {
                 return this["name"]?.StringValue;
-            } 
+            }
         }
-        public string DistinguishedName 
-        { 
+        public string DistinguishedName
+        {
             get
             {
                 return this["distinguishedName"]?.StringValue;
             }
         }
-        public string SamAccountName 
-        { 
+        public string SamAccountName
+        {
             get
             {
                 return this["sAMAccountName"]?.StringValue;
             }
         }
-        public string DisplayName 
-        { 
+        public string DisplayName
+        {
             get
             {
                 return this["displayName"]?.StringValue;
             }
         }
-        public string GivenName 
-        { 
+        public string GivenName
+        {
             get
             {
                 return this["givenName"]?.StringValue;
-            } 
+            }
         }
         public string Surname
-        { 
+        {
             get
             {
                 return this["sn"]?.StringValue;
             }
         }
-        public string EmailAddress 
-        { 
+        public string EmailAddress
+        {
             get
             {
                 return this["mail"]?.StringValue;
@@ -76,7 +76,8 @@ namespace Coming.ActiveDirectoryHelper.Models
             Attributes.Add(attributeName, attribute);
         }
 
-        private LdapAttribute GetAttributeValueByAttributeName(string attributeName) {
+        private LdapAttribute GetAttributeValueByAttributeName(string attributeName)
+        {
             LdapAttribute attributeValue = null;
             Attributes.TryGetValue(attributeName, out attributeValue);
 
@@ -87,7 +88,7 @@ namespace Coming.ActiveDirectoryHelper.Models
         {
             var attrPasswordNeverExpires = this["userAccountControl"];
 
-            if(attrPasswordNeverExpires != null)
+            if (attrPasswordNeverExpires != null)
             {
                 if (attrPasswordNeverExpires.StringValueArray.Contains("66048"))
                 {
@@ -97,7 +98,7 @@ namespace Coming.ActiveDirectoryHelper.Models
 
             var attrAccountExpirationDate = this["accountExpires"];
 
-            if(attrAccountExpirationDate != null)
+            if (attrAccountExpirationDate != null)
             {
                 long ticks = long.Parse(attrAccountExpirationDate.StringValue);
                 if (ticks == 0 || ticks == 9223372036854775807)
