@@ -114,8 +114,6 @@ namespace Coming.ActiveDirectoryHelper.Models
             if (attrAccountExpirationDate != null)
             {
                 long ticks = long.Parse(attrAccountExpirationDate.StringValue);
-                var accountExpiresDT = new DateTime(ticks);
-
                 if (ticks == 0 || ticks == 9223372036854775807)
                 {
                     return false;
