@@ -64,18 +64,27 @@ namespace Coming.ActiveDirectoryHelper.Models
                 return this["mail"]?.StringValue;
             }
         }
-
         public LdapAttribute this[string attributeName]
         {
             get => GetAttributeValueByAttributeName(attributeName);
             set => SetAttributeValueByAttributeName(attributeName, value);
         }
 
+        /// <summary>
+        /// Set value to attribute stored in dictionary by attributeName
+        /// </summary>
+        /// <param name="attributeName"></param>
+        /// <param name="attribute"></param>
         private void SetAttributeValueByAttributeName(string attributeName, LdapAttribute attribute)
         {
             Attributes.Add(attributeName, attribute);
         }
 
+        /// <summary>
+        /// Get attribute value from dictionary by attributeName
+        /// </summary>
+        /// <param name="attributeName"></param>
+        /// <returns></returns>
         private LdapAttribute GetAttributeValueByAttributeName(string attributeName)
         {
             LdapAttribute attributeValue = null;
@@ -84,6 +93,10 @@ namespace Coming.ActiveDirectoryHelper.Models
             return attributeValue;
         }
 
+        /// <summary>
+        /// Check if user expired
+        /// </summary>
+        /// <returns></returns>
         public bool IsUserExpired()
         {
             var attrPasswordNeverExpires = this["userAccountControl"];
@@ -101,6 +114,8 @@ namespace Coming.ActiveDirectoryHelper.Models
             if (attrAccountExpirationDate != null)
             {
                 long ticks = long.Parse(attrAccountExpirationDate.StringValue);
+                var accountExpiresDT = new DateTime(ticks);
+
                 if (ticks == 0 || ticks == 9223372036854775807)
                 {
                     return false;
@@ -130,6 +145,40 @@ namespace Coming.ActiveDirectoryHelper.Models
             else
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Check if user is locked
+        /// </summary>
+        /// <returns></returns>
+        public bool IsAccountLockedOut()
+        {
+            if(this["lockoutTime"] == null)
+            {
+                return false;
+            }
+
+            long lockoutTimeTicks = long.Parse(this["lockoutTime"].StringValue);
+            long lockoutDurationTicks = long.Parse(this["lockoutDuration"].StringValue);
+
+            var lockoutTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc).AddTicks(lockoutTimeTicks);
+
+            TimeSpan lockoutDuration = new TimeSpan(lockoutDurationTicks);
+
+            if (lockoutDuration != TimeSpan.MaxValue)
+            {
+                DateTime lockoutThreshold = DateTime.UtcNow.Add(lockoutDuration);
+
+                if (lockoutTime >= lockoutThreshold)
+                    return true;
+                else return false;
+            }
+            else
+            {
+                if (lockoutTimeTicks >= 0)
+                    return true;
+                else return false;
             }
         }
     }

@@ -23,7 +23,6 @@ namespace Coming.ActiveDirectoryHelper
             string searchFilter = "(objectClass=group)";
             string[] attributes = { "name" };
 
-
             return LdapHelper.ConnectionWrapper(settings, connection => {
                 ILdapSearchResults result = connection.Search(
                     settings.SearchBase,
@@ -148,23 +147,42 @@ namespace Coming.ActiveDirectoryHelper
             string searchFilter = $"(&(objectClass=user)(sAMAccountName={sAMAccountName}))";
 
             return LdapHelper.ConnectionWrapper(settings, connection => {
-                ILdapSearchResults result = connection.Search(
+
+                // get user from AD, by sAMAccountName
+                ILdapSearchResults userResult = connection.Search(
                         settings.SearchBase,
                         LdapConnection.ScopeSub,
                         searchFilter,
                         null,
                         false
                     );
+
+                searchFilter = $"(distinguishedName={settings.SearchBase})";
+                string[] attributes = { "lockoutDuration" };
+
+                // get domnen lockoutDuration,  
+
+                ILdapSearchResults lockoutDurationResult = connection.Search(
+                        settings.SearchBase,
+                        LdapConnection.ScopeSub,
+                        searchFilter,
+                        attributes,
+                        false
+                    );
+
                 try
                 {
                     ADHelperUser user = new ADHelperUser();
-                    var firstResult = result.First();
-                    var attrSet = firstResult.GetAttributeSet();
+                    var firstUser = userResult.First();
+                    var attrSet = firstUser.GetAttributeSet();
 
                     foreach (var attr in attrSet)
                     {
                         user[attr.Name] = attr;
                     }
+
+                    var firstLockoutDuratiotEntry = lockoutDurationResult.First();
+                    user["lockoutDuration"] = firstLockoutDuratiotEntry.GetAttribute("lockoutDuration");
 
                     return user;
                 }
