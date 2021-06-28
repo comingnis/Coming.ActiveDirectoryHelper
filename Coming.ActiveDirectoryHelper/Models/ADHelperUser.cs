@@ -160,6 +160,12 @@ namespace Coming.ActiveDirectoryHelper.Models
             long lockoutTimeTicks = long.Parse(this["lockoutTime"].StringValue);
             long lockoutDurationTicks = long.Parse(this["lockoutDuration"].StringValue);
 
+            DateTime utcStartTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc);
+            long ticks = DateTime.MaxValue.Ticks - utcStartTime.Ticks;
+
+            if (ticks < lockoutTimeTicks)
+                return false;
+
             var lockoutTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc).AddTicks(lockoutTimeTicks);
 
             TimeSpan lockoutDuration = new TimeSpan(lockoutDurationTicks);
