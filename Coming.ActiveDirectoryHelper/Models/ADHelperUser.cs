@@ -64,6 +64,15 @@ namespace Coming.ActiveDirectoryHelper.Models
                 return this["mail"]?.StringValue;
             }
         }
+
+        public string[] MemberOf
+        {
+            get
+            {
+                return this["memberOf"]?.StringValueArray;
+            }
+        }
+
         public LdapAttribute this[string attributeName]
         {
             get => GetAttributeValueByAttributeName(attributeName);
@@ -158,31 +167,30 @@ namespace Coming.ActiveDirectoryHelper.Models
             }
 
             long lockoutTimeTicks = long.Parse(this["lockoutTime"].StringValue);
-            long lockoutDurationTicks = long.Parse(this["lockoutDuration"].StringValue);
 
-            DateTime utcStartTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc);
-            long ticks = DateTime.MaxValue.Ticks - utcStartTime.Ticks;
-
-            if (ticks < lockoutTimeTicks)
-                return false;
-
-            var lockoutTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc).AddTicks(lockoutTimeTicks);
-
-            TimeSpan lockoutDuration = new TimeSpan(lockoutDurationTicks);
-
-            if (lockoutDuration != TimeSpan.MaxValue)
+            if (lockoutTimeTicks == 0)
             {
-                DateTime lockoutThreshold = DateTime.UtcNow.Add(lockoutDuration);
-
-                if (lockoutTime >= lockoutThreshold)
-                    return true;
-                else return false;
+                return true;
             }
             else
             {
-                if (lockoutTimeTicks >= 0)
-                    return true;
-                else return false;
+                long lockoutDurationTicks = long.Parse(this["lockoutDuration"].StringValue);
+                var lockoutTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc).AddTicks(lockoutTimeTicks);
+
+                if (lockoutDurationTicks != 0)
+                {
+                    TimeSpan lockoutDuration = new TimeSpan(Math.Abs(lockoutDurationTicks));
+                    DateTime lockoutThreshold = DateTime.UtcNow.Subtract(lockoutDuration);
+
+                    if (lockoutTime >= lockoutThreshold)
+                    {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                return true;
             }
         }
     }

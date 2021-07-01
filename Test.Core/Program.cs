@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Coming.ActiveDirectoryHelper;
+using Coming.ActiveDirectoryHelper.Models;
+using System;
 
 namespace Test.Core
 {
@@ -6,7 +8,7 @@ namespace Test.Core
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+
         }
     }
 }

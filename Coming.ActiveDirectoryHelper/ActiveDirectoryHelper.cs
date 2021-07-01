@@ -56,39 +56,38 @@ namespace Coming.ActiveDirectoryHelper
 
         public IEnumerable<string> GetGroupsForUser(ADHelperUser user)
         {
-            string searchFilter = $"(&(objectClass=group)(member={user.DistinguishedName}))";
-            string[] attributes = { "name" };
-
             return LdapHelper.ConnectionWrapper(settings, connection => {
 
-                ILdapSearchResults result = connection.Search(
-                       settings.SearchBase,
-                       LdapConnection.ScopeSub,
-                       searchFilter,
-                       attributes,
-                       false
-                   );
+                string[] attributes = { "name" };
+                string[] groupsDistinguishedNames = user.MemberOf;
 
-                IList<string> groupNames = new List<string>();
+                IList<string> groupsNames = new List<string>();
 
-                while (result.HasMore())
+                for (int i = 0; i < groupsDistinguishedNames.Length; i++)
                 {
-                    LdapEntry nextEntry = null;
+                    string searchFilter = $"(&(objectClass=group)(distinguishedName={groupsDistinguishedNames[i]}))";
+
+                    ILdapSearchResults result = connection.Search(
+                           settings.SearchBase,
+                           LdapConnection.ScopeSub,
+                           searchFilter,
+                           attributes,
+                           false
+                       );
+
                     try
                     {
-                        //result.
-                        nextEntry = result.Next();
+                        var name = result.First();
+                        groupsNames.Add(name.GetAttribute("name").StringValue);
                     }
-                    catch (LdapException e)
+                    catch (Exception ex)
                     {
-                        //Exception is thrown, go for next entry
-                        continue;
+                        return null;
                     }
 
-                    groupNames.Add(nextEntry.GetAttribute("name").StringValue);
                 }
 
-                return groupNames;
+                return groupsNames;
             });
         }
 
