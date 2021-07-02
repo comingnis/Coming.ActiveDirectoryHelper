@@ -9,6 +9,7 @@ namespace Test.Core
         static void Main(string[] args)
         {
 
+
         }
     }
 }

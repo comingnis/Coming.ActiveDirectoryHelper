@@ -56,12 +56,18 @@ namespace Coming.ActiveDirectoryHelper
 
         public IEnumerable<string> GetGroupsForUser(ADHelperUser user)
         {
-            return LdapHelper.ConnectionWrapper(settings, connection => {
+            return LdapHelper.ConnectionWrapper(settings, connection =>
+            {
 
                 string[] attributes = { "name" };
                 string[] groupsDistinguishedNames = user.MemberOf;
 
+
+
                 IList<string> groupsNames = new List<string>();
+
+                if (groupsDistinguishedNames == null)
+                    return groupsNames;
 
                 for (int i = 0; i < groupsDistinguishedNames.Length; i++)
                 {
@@ -84,7 +90,6 @@ namespace Coming.ActiveDirectoryHelper
                     {
                         return null;
                     }
-
                 }
 
                 return groupsNames;
