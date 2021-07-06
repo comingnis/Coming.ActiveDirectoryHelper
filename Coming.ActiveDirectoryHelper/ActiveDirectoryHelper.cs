@@ -96,7 +96,7 @@ namespace Coming.ActiveDirectoryHelper
 
                 return groupsNames;
             });
-        } // obradjeno
+        }
 
         public IEnumerable<string> GetMemberOfGroup(string groupName)
         {
@@ -147,7 +147,7 @@ namespace Coming.ActiveDirectoryHelper
 
                 return accountNames;
             });
-        } // obradjeno
+        } 
 
         public ADHelperUser GetUserByAccountName(string sAMAccountName)
         {
@@ -201,7 +201,7 @@ namespace Coming.ActiveDirectoryHelper
             });
         } //obrada
 
-        public bool ValidateCredential(string distinguishedName, string password) // obradjeno
+        public bool ValidateCredential(string distinguishedName, string password)
         {
             try
             {
