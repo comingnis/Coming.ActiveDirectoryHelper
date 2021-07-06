@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Copyright />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.8</Version>
+    <Version>1.0.8.1</Version>
     <PackageTags>LDAP;Microsoft Active Directory;AD;.NET Standard;.NET Core;C#</PackageTags>
     <RepositoryUrl>https://github.com/comingnis/Coming.ActiveDirectoryHelper</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
@@ -12,13 +12,14 @@
     <Company>COMING COMPUTER ENGINEERING</Company>
     <Product>Coming.ActiveDirectoryHelper</Product>
     <Description>A helper library for accessing AD, which use Novell library in background.</Description>
-    <PackageReleaseNotes>Some bugs fixed. GetGroupsForUser updated.</PackageReleaseNotes>
+    <PackageReleaseNotes>Some bugs fixed. GetGroupsForUser updated.ss</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
-    <FileVersion>1.0.8.0</FileVersion>
+    <AssemblyVersion>1.0.8.1</AssemblyVersion>
+    <FileVersion>1.0.8.1</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AntiXSS" Version="4.3.0" />
     <PackageReference Include="Novell.Directory.Ldap.NETStandard" Version="3.6.0" />
   </ItemGroup>
 

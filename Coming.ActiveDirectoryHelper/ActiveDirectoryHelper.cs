@@ -56,51 +56,54 @@ namespace Coming.ActiveDirectoryHelper
 
         public IEnumerable<string> GetGroupsForUser(ADHelperUser user)
         {
-            return LdapHelper.ConnectionWrapper(settings, connection =>
-            {
+            string userDN = user.DistinguishedName;
+            string encodedUserDN = Microsoft.Security.Application.Encoder.LdapFilterEncode(user.DistinguishedName);
 
-                string[] attributes = { "name" };
+            string searchFilter = $"(&(objectClass=group)(member={encodedUserDN}))";
+            string[] attributes = { "name" };
+
+
+            return LdapHelper.ConnectionWrapper(settings, connection => {
+
                 string[] groupsDistinguishedNames = user.MemberOf;
-
-
 
                 IList<string> groupsNames = new List<string>();
 
-                if (groupsDistinguishedNames == null)
-                    return groupsNames;
+                ILdapSearchResults result = connection.Search(
+                       settings.SearchBase,
+                       LdapConnection.ScopeSub,
+                       searchFilter,
+                       attributes,
+                       false
+                   );
 
-                for (int i = 0; i < groupsDistinguishedNames.Length; i++)
+                while (result.HasMore())
                 {
-                    string searchFilter = $"(&(objectClass=group)(distinguishedName={groupsDistinguishedNames[i]}))";
-
-                    ILdapSearchResults result = connection.Search(
-                           settings.SearchBase,
-                           LdapConnection.ScopeSub,
-                           searchFilter,
-                           attributes,
-                           false
-                       );
-
+                    LdapEntry nextEntry = null;
                     try
                     {
-                        var name = result.First();
-                        groupsNames.Add(name.GetAttribute("name").StringValue);
+                        nextEntry = result.Next();
+                        groupsNames.Add(nextEntry.GetAttribute("name").StringValue);
                     }
-                    catch (Exception ex)
+                    catch (LdapException e)
                     {
-                        return null;
+                        //Exception is thrown, go for next entry
+                        continue;
                     }
+
+
                 }
 
                 return groupsNames;
             });
-        }
+        } // obradjeno
 
         public IEnumerable<string> GetMemberOfGroup(string groupName)
         {
             return LdapHelper.ConnectionWrapper(settings, connection => {
 
-                string searchFilter = $"(&(objectClass=group)(name={groupName}))";
+                string encodedGroupName = Microsoft.Security.Application.Encoder.LdapFilterEncode(groupName);
+                string searchFilter = $"(&(objectClass=group)(name={encodedGroupName}))";
 
                 ILdapSearchResults groupDNresult = connection.Search(
                     settings.SearchBase,
@@ -111,7 +114,7 @@ namespace Coming.ActiveDirectoryHelper
                     );
 
                 var res = groupDNresult.First();
-                string groupDN = res.Dn;
+                string groupDN = Microsoft.Security.Application.Encoder.LdapFilterEncode(res.Dn);
 
                 searchFilter = $"(&(objectClass=user)(memberOf={groupDN}))";
                 string[] attributes = { "sAMAccountName" };
@@ -144,11 +147,12 @@ namespace Coming.ActiveDirectoryHelper
 
                 return accountNames;
             });
-        }
+        } // obradjeno
 
         public ADHelperUser GetUserByAccountName(string sAMAccountName)
         {
-            string searchFilter = $"(&(objectClass=user)(sAMAccountName={sAMAccountName}))";
+            string encodedsAMAccountName = Microsoft.Security.Application.Encoder.LdapFilterEncode(sAMAccountName);
+            string searchFilter = $"(&(objectClass=user)(sAMAccountName={encodedsAMAccountName}))";
 
             return LdapHelper.ConnectionWrapper(settings, connection => {
 
@@ -195,13 +199,15 @@ namespace Coming.ActiveDirectoryHelper
                     return null;
                 }
             });
-        }
+        } //obrada
 
-        public bool ValidateCredential(string distinguishedName, string password)
+        public bool ValidateCredential(string distinguishedName, string password) // obradjeno
         {
             try
             {
                 LdapConnection ldapConn = new LdapConnection();
+
+                string encodedUserDN = Microsoft.Security.Application.Encoder.LdapFilterEncode(distinguishedName);
 
                 ldapConn.Connect(settings.ServerName, settings.ServerPort);
 
