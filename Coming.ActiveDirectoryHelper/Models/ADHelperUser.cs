@@ -170,7 +170,7 @@ namespace Coming.ActiveDirectoryHelper.Models
 
             if (lockoutTimeTicks == 0)
             {
-                return true;
+                return false;
             }
             else
             {
