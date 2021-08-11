@@ -175,6 +175,7 @@ namespace Coming.ActiveDirectoryHelper.Models
             else
             {
                 long lockoutDurationTicks = long.Parse(this["lockoutDuration"].StringValue);
+
                 var lockoutTime = new DateTime(1601, 01, 01, 0, 0, 0, DateTimeKind.Utc).AddTicks(lockoutTimeTicks);
 
                 if (lockoutDurationTicks != 0)

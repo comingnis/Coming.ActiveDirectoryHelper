@@ -98,7 +98,7 @@ namespace Coming.ActiveDirectoryHelper
             });
         }
 
-        public IEnumerable<string> GetMemberOfGroup(string groupName)
+        public IEnumerable<ADHelperUser> GetMemberOfGroup(string groupName)
         {
             return LdapHelper.ConnectionWrapper(settings, connection => {
 
@@ -117,35 +117,56 @@ namespace Coming.ActiveDirectoryHelper
                 string groupDN = Microsoft.Security.Application.Encoder.LdapFilterEncode(res.Dn);
 
                 searchFilter = $"(&(objectClass=user)(memberOf={groupDN}))";
-                string[] attributes = { "sAMAccountName" };
 
-                ILdapSearchResults accountNamesresult = connection.Search(
+                ILdapSearchResults usersResult = connection.Search(
+                    settings.SearchBase,
+                    LdapConnection.ScopeSub,
+                    searchFilter,
+                    null,
+                    false
+                    );
+
+                searchFilter = $"(distinguishedName={settings.SearchBase})";
+                string[] attributes = { "lockoutDuration" };
+
+                ILdapSearchResults lockoutDurationResult = connection.Search(
                     settings.SearchBase,
                     LdapConnection.ScopeSub,
                     searchFilter,
                     attributes,
                     false
-                    );
+                );
 
-                List<string> accountNames = new List<string>();
+                var lockoutDuratiotEntry = lockoutDurationResult.First();
 
-                while (accountNamesresult.HasMore())
+                List<ADHelperUser> users = new List<ADHelperUser>();
+
+                while (usersResult.HasMore())
                 {
                     LdapEntry nextEntry = null;
                     try
                     {
-                        nextEntry = accountNamesresult.Next();
+                        nextEntry = usersResult.Next();
+                        ADHelperUser user = new ADHelperUser();
+                        var attrSet = nextEntry.GetAttributeSet();
+
+                        foreach (var attr in attrSet)
+                        {
+                            user[attr.Name] = attr;
+                        }
+
+                        user["lockoutDuration"] = lockoutDuratiotEntry.GetAttribute("lockoutDuration");
+
+                        users.Add(user);
                     }
                     catch (LdapException e)
                     {
                         //Exception is thrown, go for next entry
                         continue;
                     }
-
-                    accountNames.Add(nextEntry.GetAttribute("sAMAccountName").StringValue);
                 }
 
-                return accountNames;
+                return users;
             });
         } 
 
@@ -168,7 +189,7 @@ namespace Coming.ActiveDirectoryHelper
                 searchFilter = $"(distinguishedName={settings.SearchBase})";
                 string[] attributes = { "lockoutDuration" };
 
-                // get domnen lockoutDuration,  
+                // get domen lockoutDuration,  
 
                 ILdapSearchResults lockoutDurationResult = connection.Search(
                         settings.SearchBase,
@@ -199,7 +220,7 @@ namespace Coming.ActiveDirectoryHelper
                     return null;
                 }
             });
-        } //obrada
+        }
 
         public bool ValidateCredential(string distinguishedName, string password)
         {
@@ -211,7 +232,7 @@ namespace Coming.ActiveDirectoryHelper
 
                 ldapConn.Connect(settings.ServerName, settings.ServerPort);
 
-                ldapConn.Bind(distinguishedName, password);
+                ldapConn.Bind(encodedUserDN, password);
 
                 ldapConn.Disconnect();
 
