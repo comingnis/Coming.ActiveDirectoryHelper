@@ -25,7 +25,7 @@ namespace Test
             bool correct = helper.ValidateCredential("DN", "password");
             ADHelperUser user = helper.GetUserByAccountName("john.smith");
             IEnumerable<string> groupsForUser = helper.GetGroupsForUser(user);
-            IEnumerable<string> accountNames = helper.GetMemberOfGroup("GroupName");
+            IEnumerable<ADHelperUser> accountNames = helper.GetMemberOfGroup("GroupName");
             IEnumerable<string> groups = helper.GetAllGroups();
 
             foreach (var group in groups)
