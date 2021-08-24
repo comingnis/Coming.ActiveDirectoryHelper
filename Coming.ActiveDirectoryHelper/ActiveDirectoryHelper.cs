@@ -224,6 +224,8 @@ namespace Coming.ActiveDirectoryHelper
 
         public bool ValidateCredential(string distinguishedName, string password)
         {
+            // TODO: Ispitati da li je uposte potrebno raditi enkodiranje DN-a za sad je napravljeno da proverava 
+            // obe kombinacije i da propusti ukoliko je jedna bilo koja uspesna.
             try
             {
                 LdapConnection ldapConn = new LdapConnection();
@@ -232,7 +234,16 @@ namespace Coming.ActiveDirectoryHelper
 
                 ldapConn.Connect(settings.ServerName, settings.ServerPort);
 
-                ldapConn.Bind(encodedUserDN, password);
+                try
+                {
+                    // Prvi pokusaj sa enkodiranim DN-om, ukoliko ne prodje probamo samo DN.
+                    ldapConn.Bind(encodedUserDN, password);
+                }
+                catch
+                {
+                    // Drugi pokusaj samo DN ukoliko i ovo ne prodje idemo u glavni catch i logovanje je definitivno neuspesno.
+                    ldapConn.Bind(distinguishedName, password);
+                }
 
                 ldapConn.Disconnect();
 
