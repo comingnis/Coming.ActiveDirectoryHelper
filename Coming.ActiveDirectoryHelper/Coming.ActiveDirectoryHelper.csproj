@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Copyright />
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.8.2</Version>
+    <Version>1.0.8.5</Version>
     <PackageTags>LDAP;Microsoft Active Directory;AD;.NET Standard;.NET Core;C#</PackageTags>
     <RepositoryUrl>https://github.com/comingnis/Coming.ActiveDirectoryHelper</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
@@ -12,10 +12,10 @@
     <Company>COMING COMPUTER ENGINEERING</Company>
     <Product>Coming.ActiveDirectoryHelper</Product>
     <Description>A helper library for accessing AD, which use Novell library in background.</Description>
-    <PackageReleaseNotes>Some bugs fixed. IsAccountLockedOut() updated.</PackageReleaseNotes>
+    <PackageReleaseNotes>ValidateCredential() - name encoding removed</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.8.2</AssemblyVersion>
-    <FileVersion>1.0.8.2</FileVersion>
+    <AssemblyVersion>1.0.8.4</AssemblyVersion>
+    <FileVersion>1.0.8.4</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
